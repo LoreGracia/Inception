@@ -1,0 +1,18 @@
+FROM alpine:3.22
+
+WORKDIR /var/www/html
+
+RUN apk update && apk add --no-cache php-fpm php-mysql php-mysqli \
+	php-iconv php-json php-mbstring php-ctype php-phar curl
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+	&& chmod +x wp-cli.phar \
+	&& mv wp-cli.phar /usr/local/bin/wp
+RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/g' \
+	/etc/php84/php-fpm.d/www.conf
+
+COPY tools/setup.sh /setup.sh
+RUN chmod +x /setup.sh
+
+EXPOSE 9000
+
+ENTRYPOINT ["sh", "/setup.sh"]
