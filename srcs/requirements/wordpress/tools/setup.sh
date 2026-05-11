@@ -17,12 +17,7 @@ if [ ! -f "wp-config.php" ]; then
     wp user create --allow-root ${WP_USER} ${WP_USER_EMAIL} --user_pass=${WP_USER_PWD} --role=author
 fi
 
-mkdir -p /run/php
-
-addgroup -S www-data 2>/dev/null || true
-adduser -S www-data -G www-data 2>/dev/null || true
-
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
 
-exec /usr/sbin/php-fpm84 -F
+exec /usr/sbin/php-fpm83 -F
