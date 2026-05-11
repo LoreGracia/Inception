@@ -1,9 +1,9 @@
-MYSQL_PASSWORD=$(cat /run/secrets/db_password)
-WP_ADMIN_PWD=$(cat /run/secrets/wp_admin_password)
-WP_USER_PWD=$(cat /run/secrets/wp_user_password)
+MYSQL_PASSWORD=$(cat /run/secrets/db_password.txt)
+WP_ADMIN_PWD=$(cat /run/secrets/wp_admin_password.txt)
+WP_USER_PWD=$(cat /run/secrets/wp_user_password.txt)
 
 until mariadb-admin ping -h"mariadb" --silent; do
-    echo "Esperando a MariaDB..."
+    echo "Waiting for MariaDB..."
     sleep 2
 done
 

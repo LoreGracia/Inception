@@ -13,6 +13,7 @@ services:
      - db_root_password
     restart: always
   wordpress:
+    container_name: wordpress
     build: ./requirements/wordpress
     volumes:
      - wordpress_data:/var/www/html
@@ -26,6 +27,7 @@ services:
      - wp_user_password
     restart: always
   nginx:
+    container_name: nginx
     build: ./requirements/nginx
     networks:
      - inception
