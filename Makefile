@@ -8,8 +8,8 @@ all:
 	$(DOCKER_COMPOSE) up -d --build
 
 clean:
+	docker run --rm -v $(DATA_PATH):/data alpine:3.22 sh -c "rm -rf /data/*"
 	$(DOCKER_COMPOSE) down -v --rmi all
-	@rm -rf $(DATA_PATH)
 
 fclean: clean
 	docker system prune -af

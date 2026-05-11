@@ -1,6 +1,7 @@
 services:
   mariadb:
     container_name: mariadb
+    image: mariadb:alpine3.22
     build: ./requirements/mariadb
     volumes:
      - mariadb_data:/var/lib/mysql
@@ -14,6 +15,7 @@ services:
     restart: always
   wordpress:
     container_name: wordpress
+    image: wordpress:alpine3.22
     build: ./requirements/wordpress
     volumes:
      - wordpress_data:/var/www/html
@@ -28,6 +30,7 @@ services:
     restart: always
   nginx:
     container_name: nginx
+    image: nginx:alpine3.22
     build: ./requirements/nginx
     networks:
      - inception
