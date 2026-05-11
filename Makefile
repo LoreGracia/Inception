@@ -1,5 +1,5 @@
 NAME = inception
-DOCKER_COMPOSE = docker compose -f srcs/docker-compose.yml
+DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
 DATA_PATH = /home/lgracia-/data
 
 all:
@@ -7,13 +7,17 @@ all:
 	@mkdir -p $(DATA_PATH)/wordpress
 	$(DOCKER_COMPOSE) up -d --build
 
-down:
-	$(DOCKER_COMPOSE) down
-
 clean:
 	$(DOCKER_COMPOSE) down -v --rmi all
 	@rm -rf $(DATA_PATH)
 
-re: clean all
+fclean: clean
+	docker system prune -af
+	docker volume prune -f
 
-.PHONY: all build down clean re
+prune: fclean
+	docker builder prune -af
+
+re: fclean all
+
+.PHONY: all clean fclean prune re

@@ -36,7 +36,8 @@ services:
     restart: always
 
 networks:
-  inception
+  inception:
+    driver: bridge
 
 volumes:
   mariadb_data:
