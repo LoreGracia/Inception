@@ -7,9 +7,11 @@ all:
 	@mkdir -p $(DATA_PATH)/wordpress
 	$(DOCKER_COMPOSE) up -d --build
 
-clean:
-	docker run --rm -v $(DATA_PATH):/data alpine:3.22 sh -c "rm -rf /data/*"
+down:
 	$(DOCKER_COMPOSE) down -v --rmi all
+
+clean: down
+	sudo rm -rf $(DATA_PATH)
 
 fclean: clean
 	docker system prune -af
