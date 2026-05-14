@@ -19,5 +19,4 @@ EOF
 
 /usr/bin/mysqld --user=mysql --bootstrap < /tmp/db_setup.sql
 rm -f /tmp/db_setup.sql
-
-exec /usr/bin/mysqld --user=mysql --console --bind-address=0.0.0.0
+exec /usr/bin/mariadbd --user=mysql --console --bind-address=0.0.0.0 --port=3306

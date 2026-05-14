@@ -4,7 +4,7 @@ WORKDIR /var/www/html
 
 RUN apk update && apk add --no-cache php-fpm php-mysqli \
 	php-iconv php-json php-mbstring php-ctype php-phar curl \
-	mariadb-client
+	mariadb-client fcgi
 
 RUN mkdir -p /run/php \
 	&& addgroup -S www-data 2>/dev/null || true \
@@ -14,6 +14,7 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 	&& chmod +x wp-cli.phar \
 	&& mv wp-cli.phar /usr/local/bin/wp
 
+RUN sed -i 's/memory_limit = 128M/memory_limit = 512M/g' /etc/php83/php.ini
 RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/g' /etc/php83/php-fpm.d/www.conf
 RUN sed -i 's/user = nobody/user = www-data/g' /etc/php83/php-fpm.d/www.conf
 RUN sed -i 's/group = nobody/group = www-data/g' /etc/php83/php-fpm.d/www.conf
