@@ -59,6 +59,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    volumes:
+     - wordpress_data:/var/www/html
     restart: always
 
 networks:
