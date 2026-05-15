@@ -20,6 +20,6 @@ fclean: clean
 prune: fclean
 	docker builder prune -af
 
-re: fclean all
+re: prune all
 
 .PHONY: all clean fclean prune re
