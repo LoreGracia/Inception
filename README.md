@@ -29,27 +29,28 @@ graph TD
 ```
 
 ## Proyect arquitecture
-.
-├── Makefile
-├── secrets/                  # For confidential information
-├── srcs/
-│   ├── .env.example                 # Environment variables
-│   ├── docker-compose.yml    # Service configuration
-│   └── requirements/
-│       ├── mariadb/
-│       │   ├── Dockerfile
-│       │   └── tools/setup.sh
-│       ├── nginx/
-│       │   ├── Dockerfile
-│       │   ├── conf/nginx.conf
-│       │   └── tools/setup.sh
-│       └── wordpress/
-│           ├── Dockerfile
-│           └── tools/setup.sh
-├── README.md                 # General proyect information
-├── USER_DOC.md               # User documentation
-└── DEV_DOC.md                # Developer documentation
-
+```
+.  
+├── Makefile  
+├── secrets/                  # For confidential information  
+├── srcs/  
+│   ├── .env.example          # Environment variables  
+│   ├── docker-compose.yml    # Service configuration  
+│   └── requirements/  
+│       ├── mariadb/  
+│       │   ├── Dockerfile  
+│       │   └── tools/setup.sh  
+│       ├── nginx/  
+│       │   ├── Dockerfile  
+│       │   ├── conf/nginx.conf  
+│       │   └── tools/setup.sh  
+│       └── wordpress/  
+│           ├── Dockerfile  
+│           └── tools/setup.sh  
+├── README.md                 # General proyect information  
+├── USER_DOC.md               # User documentation  
+└── DEV_DOC.md                # Developer documentation  
+```
 ## Concept omparisons
 #### 1. Virtual Machines vs Docker
 | Feature | Virtual Machines | Docker |
@@ -116,26 +117,20 @@ It also was of assistance in the technical writing of required comparisons and o
 # Additional information
 ## Technical choices
 All the choices where made for minimal memory and resource use.
-- VirtaulBox: Alpine Linyx 3.22 system, avalaible for the exercise subject and chosen for its light and secure advantatge over debian.
-- Docker: docker-compose and alpine, maraidb and wordpress base images as required by the proyect
+- VirtaulBox: Alpine Linux system, chosen for its light and secure advantatge over debian.
+- Docker: docker-compose and Alpine Linux 3.22, maraidb and wordpress base images as required by the proyect
 - Makefile: for docker-compose construction and clenup.
 
 ## Feature list
 This are some basic limitations by the subject that characterize this proyect.
-Single Entry Point: NGINX acts as the only service exposed externally through port 443.
-
-Network Isolation: MariaDB and WordPress do not expose ports to the host, communicating only internally.
-
-Data Persistence: Named Volumes mounted on /home/lgracia-/data are used to ensure that files and the database survive container restarts.
-
-Process Management: Each container launches its main service as PID 1 through entrypoint scripts that prevent infinite loops or unstable patches.
 
 | Feature rquired | Solution |
 | :--- | :--- |
-| **Prohibition of the tag :latest** | Prohibition of the tag :latest
-Specific versions have been set in the Dockerfiles (e.g., alpine:3.18 and mariadb:10.11) to ensure environment reproducibility. |
-| **Data Persistence** | The volumes use bind-mounts directed to /home/${USER}/data/, where ${USER} is dynamically resolved at student login |
+| **Single Entry Point** | NGINX acts as the only service exposed externally through port 443 |
 | **Network Isolation** | Implementation of an internal bridge network called inception. MariaDB and WordPress do not expose ports to the host, making them inaccessible outside the internal network. |
+| **Data Persistence** | Named Volumes bind-mounted on /home/lgracia-/data are used to ensure that files and the database survive container restarts. |
+| **Process Management** | Each container launches its main service as PID 1 through entrypoint scripts that prevent infinite loops or unstable patches. |
+| **Prohibition of the tag `latest`** | Specific versions have been set in the Dockerfiles (e.g., alpine:3.18 and mariadb:10.11) to ensure environment reproducibility. |
 | **Credential Management** | Use of a /secrets directory structure outside the code tree. Passwords are mounted as read-only files, complying with the prohibition of plaintext secrets in Git. |
 | **TLS v1.2/v1.3** | Strict configuration in the NGINX files, disabling previous versions to comply with modern security standards. |
 | **WP User Rules** | Logical validation in entrypoint.sh that prevents the creation of administrators with names containing "admin" or "administrator". |
