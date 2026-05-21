@@ -1,7 +1,42 @@
 This document is intended for someone who wants to understand the internal architecture or modify the code
 # Set up the environment from scratch (prerequisites, configuration files, secrets).
-## Virtual Machine
+## VirtualBox Machine
+The virtual machine in this proyect was Alpine virtual x86_64 (from [AlpineLinux.org](https://alpinelinux.org/downloads/)) in Oracle VM VirtualBox. 
+Docker, docker compose and make must be installed with `apk add` for this proyect. Is reocommended to use `--no-cache` flag to avoid unecesary residual files from the installation.
+### Get a shared folder & bidirectional clipboard
+This recommended for working with the virtual machine and the main machine.  
+Besides setting a mount point in the VirtualBox machine settings for the shared folder there's some additions for the shared folder to work.  
+Same for the clipboard, VirtualMachine settings> General > advanced > Shared Clipboard 
+set Bidirecional plus the following steps will get it working.
+1. Get VBoxGuestAdditions in Alpine:
+`apk add virtualbox-guest-additions  virtualbox-guest-additions-openrc virtualbox-guest-additions-x11`  
+virtualbox-guest-additions-x11 → is the to to bring VBoxClient (clipboard, drag&drop, etc.)
+2. Start guest addtions
+`rc-update add virtualbox-guest-additions default`  
+`rc-service virtualbox-guest-additions start`
+3. Reboot the machine to apply changes
+`reboot`
 ## Configuration file
+This are the main files that will build the containers.
+#### .env
+This a file all containers will have access to, indicated in the docker-compose file.
+This file will contain all no sensible variables like:
+- DOMAIN_NAME: this will be the link path name of the built website.
+VOLUME_PATH: this is yout folder path to where the databases of mariadb and wordpress will be saved.
+- MYSQL_DATABASE: the name of the wordpress database, included the name of the folder.
+- MYSQL_USER: name of mariadb's user.  
+It's password is sensible information and must be in secrets.
+
+- WP_ADMIN_USER: name of the admin user, needed to log as administrator and edit the website.  
+It's password is sensible information and must be in secrets.
+- WP_ADMIN_EMAIL: wordpress admin's email, needed by wordpress.
+- WP_USER name of wordpress's user.  
+It's password is sensible information and must be in secrets.
+- WP_USER_EMAILwordpress user's email, needed by wordpress.
+#### docker-compose.yml
+This is the center of the network, volumes and restart politic configuration of all the containers, named services in this file (MariaDB, WordPress and NGINX). In the next section about the build and launch will be more detailed.
+#### .conf & setup.sh
+
 ## Secrets
 Create a secrets folder in the makefile level and create the four passwords needed for mariadb and wordpress:  
 `db_password.txt`  
@@ -22,25 +57,23 @@ It is the file in the root of the project that automates everything. It does not
 It is thte file called by the makefile. It is located inside the srcs/ folder. Defines the "map" of how the services relate.  
 
 **Services**: Defines a Mariadb, Wordpress, and Nginx.Each one indicates:
-- Container name for the repository to avoid standard naming with prefixes and sufixes like `srcs-wordpress-1`.
-- Base image from which the container will be built.
-- Path of its own Dockerfile to be built locally, since pre-built images are not allowed.
-- Volume path, is standard for each container, execpt nginx which doesn't have its own, but needs access to wordpress's.
-- Network that will allow them to communicate between them.
-- Environment file to manage databases names and users.
-- Secrets that will be used in the container
-- Port exposed only with nginx, the only aislated container allowed to be accessed externally throught the port 443, world standard for encrypted HTTPS traffic.
-- Healthcheck to ensure the container state, this will allow to make dependencies to build in order.
-- Dependency is used to make an ordered built, starting with mariadb and only when finished, working and healthy start with wordpress and then nginx.
-- Restart policies to automatically restart in case of failure or system crash, `restart: always`.  
+- **Container name** for the repository to avoid standard naming with prefixes and sufixes like `srcs-wordpress-1`.
+	- Base **image** from which the container will be built.
+	- Path of its own Dockerfile to be **built** locally, since pre-built images are not allowed.
+	- **Volume** path, is standard for each container, except nginx which doesn't have its own, but needs access to wordpress's. In the named volumes section the variables mariadb_data and wordpress_data are defined.
+	- **Network** that will allow them to communicate between them.
+	- **Environment** file to manage databases names and users.
+	- **Secrets** that will be used in the container
+	- **Port** exposed only with nginx, the only aislated container allowed to be accessed externally throught the port 443, world standard for encrypted HTTPS traffic.
+	- **Healthcheck** to ensure the container state, this will allow to make dependencies to build in order.
+	- **Dependency** is `depends_on`, used to make an ordered built throught the healthcheck, starting with mariadb and only when finished, working and healthy start with wordpress and then nginx.
+	- Restart policies to automatically **restart** in case of failure or system crash, `restart: always`.  
 
 **Networks**: There is a internal network (e.g., `inception`) so that they can communicate with each other.  
 
-**Named Volumes**: Registers mariadb_data and wordpress_data.  
+**Named Volumes**: Registers mariadb_data and wordpress_data, this will be the paths to save all the data, the databases for persistence.  
 
 **Secrets**: used to manage confidential information like passwords of databases, it has the secret's name and associates the path to the file with the content.  
-
-**Configuration**: Associates the Dockerfiles of each service and loads the .env file.  
 
 ### 3. Dockerfiles
 There is one for each service inside srcs/requirements/service/. Defines what is "inside" each container.  
