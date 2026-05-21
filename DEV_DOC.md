@@ -3,6 +3,11 @@ This document is intended for someone who wants to understand the internal archi
 ## Virtual Machine
 ## Configuration file
 ## Secrets
+Create a secrets folder in the makefile level and create the four passwords needed for mariadb and wordpress:  
+`db_password.txt`  
+`db_root_password.txt`  
+`wp_admin_password.txt`  
+`wp_user_password.txt`  
 ## Environment
 Follow the `.env.example` is to create the `.env` needed for the proyect. Do no use admin in the WP user name.
 # Build and launch the project.
