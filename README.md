@@ -6,8 +6,6 @@ Inception is a systems administration project designed to deepen knowledge of vi
 
 The project emphasizes security and isolation, prohibiting the use of pre-built images or tools like DockerHub for the main services (except for the base Alpine/Debian image). Each service runs in a dedicated container, communicating exclusively through a private Docker network.
 
-
-
 ```mermaid
 graph TD
     subgraph Computer_HOST [Computer HOST]
@@ -27,7 +25,7 @@ graph TD
     WP -.-> VolWP
     DB -.-> VolDB
 ```
-
+This proyect is built inside a virtual machine, the two main reasons are limitations of the environment in which to develop the proyect and the multiple containerized applications to be run, increased resource utilization and reduced costs of VM with a container runtime.
 ## Proyect arquitecture
 ```
 .  
@@ -91,6 +89,10 @@ graph TD
 | **Subject Rule** | **Mandatory** for WP and DB | **Forbidden** for persistent storage |
 
 **Project feature**: **Named Docker Volumes** are used to persist the WordPress files and MariaDB database, ensuring that data is safely stored in `/home/login/data` as required by the subject [1-3].
+
+#### Difference Between Images with and without Compose
+An image is a standalone, executable package. Using it without Compose requires running containers individually (e.g., `docker run`), which makes managing connections between them manual and complex.  
+With Compose, the image becomes part of an automated stack; Compose handles the internal networking (DNS by service name), volume mounting, and startup dependencies automatically.
 
 # Instructions
 Requirements: A Linux virtual machine (Alpinex in this case) with Docker, Docker Compose, and Make installed.

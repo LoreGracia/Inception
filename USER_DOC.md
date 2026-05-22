@@ -30,14 +30,23 @@ For security, no passwords are stored in the repository:
 3.  **Inside Containers**: Secrets are mounted at `/run/secrets/`.
 
 # Service command verification
-**Service Status**: `docker ps` (Should show the three containers with status "Up").  
+**Service Status**: `docker ps` (Should show the three containers with status "Up"). Only the NGINX container should show a mapping to the host (e.g., 0.0.0.0:443->443/tcp). The WordPress and MariaDB containers should show their internal ports (9000 and 3306) without a host mapping.  
 
 **Network Isolation**: `docker network inspect inception` (Should confirm that only NGINX has external exposure).  
 
-**TLS Verification**: `openssl s_client -connect lgracia-.42.fr:443 -tls1_2` (Validates that the TLSv1.2 protocol is accepted and the certificate is correct).  
+**TLS Verification**: `openssl s_client -connect lgracia-.42.fr:443 -tls1_2` (Validates that the TLSv1.2 protocol is accepted and the certificate is correct).  Although, this one shoud fail `openssl s_client -connect lgracia-.42.fr:443 -tls1_1`.
 
-**Initialization Monitoring**: `docker-compose logs -f` (Allows auditing the execution of the `entrypoint.sh` scripts and user creation).
+**Volúmenes Nombrados**: Confirma con `docker volume ls` que existen los dos volúmenes requeridos.  
+
+**Initialization Monitoring**: `docker-compose logs -f` (Allows auditing the execution of the `entrypoint.sh` scripts and user creation). Also `docker logs container_name`.  
 
 **Enter container**: `docker exec -it container-name sh`.  
 
-**Databases**: `show databases;`, `USE wordpress_db;`, `SHOW TABLES;`.
+**Databases**: `show databases;`,  `use wordpress_db`, `select user_login from wp_users;`.
+
+**Auto-restart**: Stop a container manually `docker stop srcs-wordpress-1` and check with docker ps that it restarts automatically after a few seconds
+
+**No access through HTTP**: `curl -I http://lgracia-.42.fr`, `telnet lgracia-.42.fr 80`, this must show `Connection refused` or similar, indicating NGINX isn't listenning port 80.
+
+
+

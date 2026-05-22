@@ -21,7 +21,7 @@ This are the main files that will build the containers.
 #### .env
 This a file all containers will have access to, indicated in the docker-compose file.
 This file will contain all no sensible variables like:
-- DOMAIN_NAME: this will be the link path name of the built website.
+- DOMAIN_NAME: this will be the link path name of the built website. You must also have changed the `/etc/hosts` file, it must include the line: `127.0.0.1 lgracia-.42.fr`.
 VOLUME_PATH: this is yout folder path to where the databases of mariadb and wordpress will be saved.
 - MYSQL_DATABASE: the name of the wordpress database, included the name of the folder.
 - MYSQL_USER: name of mariadb's user.  
@@ -36,6 +36,20 @@ It's password is sensible information and must be in secrets.
 #### docker-compose.yml
 This is the center of the network, volumes and restart politic configuration of all the containers, named services in this file (MariaDB, WordPress and NGINX). In the next section about the build and launch will be more detailed.
 #### .conf & setup.sh
+Every container has a `setup.sh` in `tools/` and only nginx has a `conf/.conf`.
+The `setup.sh` is a script that allows to set some configurations and parameters specificly needed for the exectuion of each container.
+- **Secrets and Environment Management**  
+The scripts read passwords directly from /run/secrets/ and inject them into the service configuration (such as WordPress's wp-config.php or MariaDB privileges).
+
+- **Installation and Bootstrap**  
+	- **MariaDB**  
+	Checks if the data directory /var/lib/mysql/mysql exists; if not, runs mysql_install_db and creates the necessary databases and users using temporary SQL commands.
+
+	- **WordPress**  
+	Uses WP-CLI to download the WordPress core, configure the database connection, and create users (including the required administrator) only if the site is not already installed.
+- **Running as PID 1**
+The `exec` command is used at the end of the script (e.g., `exec mariadbd` or `exec php-fpm`). This replaces the shell script process with the service binary, allowing the container to correctly receive and handle stop signals (SIGTERM).
+- **Permissions Management**   Ensures that mounted volumes have the correct owners (such as mysql:mysql or www-data:www-data) before starting the main process.
 
 ## Secrets
 Create a secrets folder in the makefile level and create the four passwords needed for mariadb and wordpress:  
@@ -96,21 +110,25 @@ There is one for each service inside srcs/requirements/service/. Defines what is
 **Volumes**: The actual data lives on the host in /home/login/data and Docker "connects" them to the internal folders of the containers.  
 
 # Commands to manage the containers and volumes
-**Service Status**: `docker ps` (Should show the three containers with status "Up").  
+**Service Status**: `docker ps` (Should show the three containers with status "Up"). Only the NGINX container should show a mapping to the host (e.g., 0.0.0.0:443->443/tcp). The WordPress and MariaDB containers should show their internal ports (9000 and 3306) without a host mapping.  
 
 **Network Isolation**: `docker network inspect inception` (Should confirm that only NGINX has external exposure).  
 
 **TLS Verification**: `openssl s_client -connect lgracia-.42.fr:443 -tls1_2` (Validates that the TLSv1.2 protocol is accepted and the certificate is correct).  
 
-**Volúmenes Nombrados**: Confirma con docker volume ls que existen los dos volúmenes requeridos.  
+**Volúmenes Nombrados**: Confirma con `docker volume ls` que existen los dos volúmenes requeridos.  
 
 **Initialization Monitoring**: `docker-compose logs -f` (Allows auditing the execution of the `entrypoint.sh` scripts and user creation). Also `docker logs container_name`.  
 
 **Enter container**: `docker exec -it container-name sh`.  
 
-**Databases**: `show databases;`, `select ... from sys.databases;`.
+**Databases**: `show databases;`,  `use wordpress_db`, `select user_login from wp_users;`.
 
 **Auto-restart**: Stop a container manually `docker stop srcs-wordpress-1` and check with docker ps that it restarts automatically after a few seconds
+
+**No access through HTTP**: `curl -I http://lgracia-.42.fr`, `telnet lgracia-.42.fr 80`, this must show `Connection refused` or similar, indicating NGINX isn't listentint port 80.
+
+
 
 # Project data & persistence
 There are two volumes for persistence, on for mariadb and another for wordpress, nginx has access to this one as well.
